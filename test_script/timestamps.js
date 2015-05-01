@@ -49,7 +49,7 @@ function timestamps(filename) {
     }
 
     //return srtString;
-    fs.writeFile(filename.split('.')[0] + '.srt', srtString, function(err) {
+    fs.writeFile('videos/' + filename.split('.')[0] + '.srt', srtString, function(err) {
         if (err) {
             return console.log(err);
         }

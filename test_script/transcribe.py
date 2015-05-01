@@ -69,7 +69,7 @@ def convert_timestamps(f):
 raw_recordings = []
 
 for f in os.listdir(os.getcwd()):
-    if f.endswith(".wav"):
+    if f.endswith(".wav") or f.endswith(".mp3"):
         raw_recordings.append(str(f))
         continue
     else:
