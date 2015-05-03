@@ -17,6 +17,7 @@ def transcribe(files=[], pre=10, post=50):
     for i, f in enumerate(files):
         #print str(i+1) + '/' + str(total) + ' Transcribing ' + f
         filename = f.replace('.temp.wav', '') + '.transcription.txt'
+        filename = "transcripts/" + filename
         transcript = subprocess.check_output(['pocketsphinx_continuous', '-infile', f, '-time', 'yes', '-logfn', '/dev/null', '-vad_prespeech', str(pre), '-vad_postspeech', str(post)])
 
         with open(filename, 'w') as outfile:
@@ -68,29 +69,32 @@ def convert_timestamps(f):
 
 raw_recordings = []
 
-for f in os.listdir(os.getcwd()):
-    if f.endswith(".wav"):
-        raw_recordings.append(str(f))
-        continue
-    else:
-        continue
+# for f in os.listdir(os.getcwd()):
+#     if f.endswith(".wav"):
+#         raw_recordings.append(str(f))
+#         continue
+#     else:
+#         continue
 
-converted = convert_to_wav(raw_recordings)
-transcribe(files=converted)
+# print raw_recordings
 
-for f in os.listdir(os.getcwd()):
+# converted = convert_to_wav(raw_recordings)
+# transcribe(files=converted)
+
+for f in os.listdir('transcripts'):
     if f.endswith(".transcription.txt"):
-        data = convert_timestamps(f)
+        print f
+        data = convert_timestamps("transcripts/" + f)
         # print data
         filename = f.split('.')[0]
         with open(filename + '.js', 'w') as outfile:
             json.dump(data, outfile)
 
-for f in os.listdir(os.getcwd()):
-    if f.endswith(".js"):
+# for f in os.listdir(os.getcwd()):
+#     if f.endswith(".js"):
         # script = 'timestamps.js ' + str(f)
-        print str(f)
-        subprocess.call(['node', 'timestamps.js', str(f)])
+        # print str(f)
+        # subprocess.call(['node', 'timestamps.js', str(f)])
 
 # transcribe(convert_to_wav(['mike_sarah.wav']))
 
