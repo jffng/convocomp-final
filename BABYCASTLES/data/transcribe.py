@@ -15,15 +15,20 @@ def transcribe(files=[], pre=10, post=50):
     total = len(files)
 
     for i, f in enumerate(files):
-        #print str(i+1) + '/' + str(total) + ' Transcribing ' + f
-        filename = f.replace('.temp.wav', '') + '.transcription.txt'
-        filename = "transcripts/" + filename
-        transcript = subprocess.check_output(['pocketsphinx_continuous', '-infile', f, '-time', 'yes', '-logfn', '/dev/null', '-vad_prespeech', str(pre), '-vad_postspeech', str(post)])
+        try:
+            #print str(i+1) + '/' + str(total) + ' Transcribing ' + f
+            filename = f.replace('.temp.wav', '') + '.transcription.txt'
+            filename = "transcripts/" + filename
+            transcript = subprocess.check_output(['pocketsphinx_continuous', '-infile', f, '-time', 'yes', '-logfn', '/dev/null', '-vad_prespeech', str(pre), '-vad_postspeech', str(post)])
 
-        with open(filename, 'w') as outfile:
-            outfile.write(transcript)
+            with open(filename, 'w') as outfile:
+                outfile.write(transcript)
 
-        os.remove(f)
+            os.remove(f)
+            continue
+        except subprocess.CalledProcessError:
+            print 'Failed to transcribe ' + f
+            continue
 
 
 def convert_timestamps(f):
@@ -67,25 +72,29 @@ def convert_timestamps(f):
 
     return sentences
 
-raw_recordings = []
+def rename_raw():
+    raw_recordings = []
+    
+    for f in os.listdir(os.getcwd()):
+        if f.endswith('.wav'):
+            shortened = f.split('-')[1]
+            new_name = shortened[:4] + '-' + shortened[4:] + '.wav'
+            os.rename(f, new_name)
+            raw_recordings.append(str(new_name))
+        else:
+            continue
 
-# for f in os.listdir(os.getcwd()):
-#     if f.endswith(".wav"):
-#         raw_recordings.append(str(f))
-#         continue
-#     else:
-#         continue
+    return raw_recordings
 
-# print raw_recordings
+recordings = rename_raw()
 
-# converted = convert_to_wav(raw_recordings)
-# transcribe(files=converted)
+converted = convert_to_wav(recordings)
+transcribe(files=converted)
 
 for f in os.listdir('transcripts'):
     if f.endswith(".transcription.txt"):
         print f
         data = convert_timestamps("transcripts/" + f)
-        # print data
         filename = f.split('.')[0]
         with open(filename + '.js', 'w') as outfile:
             json.dump(data, outfile)
@@ -95,8 +104,3 @@ for f in os.listdir('transcripts'):
         # script = 'timestamps.js ' + str(f)
         # print str(f)
         # subprocess.call(['node', 'timestamps.js', str(f)])
-
-# transcribe(convert_to_wav(['mike_sarah.wav']))
-
-# print json.dumps(convert_timestamps(['moon_korean.wav.transcription.txt']))
-
